@@ -1,4 +1,3 @@
-# from lor_deckcodes import LoRDeck
 from explor.helpers import get_all_cards, get_cards_info
 
 
@@ -55,35 +54,34 @@ def analyze_mana_curve(cards):
     return [playstyle + " mana costs"]
 
 
-def analyze_type_percentage(decks, keyword_only):
-    counts = {'Low Champion': 0, 'High Spell': 0, 'High Unit': 0}
-    for deck in decks:
-        card_types = [card['type'] for card in deck]
-        isChampion = [1 if card['supertype'] ==
-                      'Champion' else 0 for card in deck]
-        champions = sum(isChampion)
-        spells = len(
-            [card_type for card_type in card_types if card_type == 'Spell'])
-        units = len(
-            [card_type for card_type in card_types if card_type == 'Unit'])
-        if champions < 5:
-            counts['Low Champion'] += 1
-        if spells > 20:
-            counts['High Spell'] += 1
-        if units >= 27:
-            counts['High Unit'] += 1
-    playstyles = [key for key in counts.keys() if counts[key] > len(decks) / 2]
+def analyze_type_percentage(cards, keyword_only):
+    card_types = [card['type'] for card in cards]
+    isChampion = [1 if card['supertype'] ==
+                  'Champion' else 0 for card in cards]
+    champions = sum(isChampion)
+    spells = len(
+        [card_type for card_type in card_types if card_type == 'Spell'])
+    units = len(
+        [card_type for card_type in card_types if card_type == 'Unit'])
+    tags = []
+    if champions < 5:
+        tags.append('Low Champion')
+    if spells > 20:
+        tags.append('High Spell')
+    if units >= 27:
+        tags.append('High Unit')
     if keyword_only:
-        return playstyles
+        return tags
     else:
-        return [playstyle + " counts" for playstyle in playstyles]
+        return [tag + " count" for tag in tags]
+
 
 def get_stats(cards, keyword_only):
     keyword_counts = get_keyword_counts(cards, keyword_only)
     spell_counts = get_spell_counts(cards, keyword_only)
     mana_curve_desc = analyze_mana_curve(cards)
-    # type_percents = analyze_type_percentage(cards, keyword_only)
-    return keyword_counts + spell_counts + mana_curve_desc #+ type_percents + mana_curve_desc
+    type_percents = analyze_type_percentage(cards, keyword_only)
+    return keyword_counts + spell_counts + type_percents + mana_curve_desc
 
 
 def player_analytics(player_history, card_json):
@@ -91,6 +89,7 @@ def player_analytics(player_history, card_json):
     for deck in player_history:
         decks_with_cards.append(get_cards_info(deck, card_json))
     return get_stats(get_all_cards(decks_with_cards))
+
 
 def deck_analytics(decks, card_json):
     all_stats = []
