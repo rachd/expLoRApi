@@ -1,2 +1,4 @@
 flask
 lor_deckcodes
+sklearn
+requests
