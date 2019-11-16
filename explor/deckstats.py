@@ -45,9 +45,9 @@ def analyze_mana_curve(cards):
     low = len([cost for cost in card_costs if cost <= 3])
     high = len([cost for cost in card_costs if cost >= 6])
     playstyle = ""
-    if low >= 27:
+    if low % 40 >= 27:
         playstyle = "Low"
-    elif high >= 10:
+    elif high % 40 >= 10:
         playstyle = "High"
     else:
         playstyle = "Balanced"
@@ -64,11 +64,11 @@ def analyze_type_percentage(cards, keyword_only):
     units = len(
         [card_type for card_type in card_types if card_type == 'Unit'])
     tags = []
-    if champions < 5:
+    if champions % 40 < 5:
         tags.append('Low Champion')
-    if spells > 20:
+    if spells % 40 > 20:
         tags.append('High Spell')
-    if units >= 27:
+    if units % 40 >= 27:
         tags.append('High Unit')
     if keyword_only:
         return tags
@@ -76,7 +76,7 @@ def analyze_type_percentage(cards, keyword_only):
         return [tag + " count" for tag in tags]
 
 
-def get_stats(cards, keyword_only):
+def get_stats(cards, keyword_only=False):
     keyword_counts = get_keyword_counts(cards, keyword_only)
     spell_counts = get_spell_counts(cards, keyword_only)
     mana_curve_desc = analyze_mana_curve(cards)
@@ -86,7 +86,7 @@ def get_stats(cards, keyword_only):
 
 def player_analytics(player_history, card_json):
     decks_with_cards = []
-    for deck in player_history:
+    for deck in player_history.keys():
         decks_with_cards.append(get_cards_info(deck, card_json))
     return get_stats(get_all_cards(decks_with_cards))
 

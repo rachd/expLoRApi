@@ -1,7 +1,8 @@
-from explor.deckstats import deck_analytics
+from explor.deckstats import deck_analytics, player_analytics
 from explor.similarCards import get_similar_cards
 from explor.helpers import decode
 from explor.recommend import recommend_decks
+from explor.playerstats import top_cards
 import json
 from flask import Flask, request
 import requests
@@ -30,14 +31,7 @@ def suggest_cards():
     player_cards = list(player_stats["stats"]["cards"].keys())
     return json.dumps(get_similar_cards(decode(deck), missing_cards, player_cards))
 
-@app.route("/player-stats/<playerID>", methods=['GET'])
-def get_player_stats():
-    pass
-
-@app.route("/recommend-decks/<playerID>", methods=['GET'])
-def get_recommended_decks(playerID):
-    player_stats = requests.get(
-        'http://ec2-54-85-199-0.compute-1.amazonaws.com/api/players/stats?player_name='+playerID).json()
+def get_recommended_decks(player_stats):
     player_cards = list(player_stats["stats"]["cards"].keys())
     player_decks_decoded = [decode(deck) for deck in player_stats["stats"]["decks"].keys()]
     top_decks = []#requests.get('').json()   FETCH TOP 100 DECKS
@@ -46,4 +40,15 @@ def get_recommended_decks(playerID):
     top_all_cards_decoded = [decode(deck) for deck in top_all_cards]
     top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded)
     all_cards_recommendations = recommend_decks(player_decks_decoded, top_all_cards_decoded)
-    return json.dumps({'top_decks': top_recommendations, 'player_card_decks': all_cards_recommendations})
+    return (top_recommendations, all_cards_recommendations)
+
+@app.route("/player-stats/<playerID>", methods=['GET'])
+def get_player_stats(playerID):
+    player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com/api/players/stats?player_name='+playerID).json()
+    # playstyle, regions, top deck recommendations, all your cards recommendations
+    # also include top cards and top champs?
+    card_json = get_card_json()
+    (region_stats, cards_stats) = top_cards(player_stats["stats"]["cards"], card_json)
+    (top_recommendations, all_cards_recommendations) = get_recommended_decks(player_stats)
+    playstyle = player_analytics(player_stats["stats"]["decks"], card_json)
+    return json.dumps({'playstyle': playstyle, 'cards': cards_stats, 'regions': region_stats, 'top_recommendations': top_recommendations, 'all_card_recommendations': all_cards_recommendations})
