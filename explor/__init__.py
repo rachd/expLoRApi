@@ -38,8 +38,8 @@ def suggest_cards():
     return response_to_json(json.dumps(get_similar_cards(decode(deck), missing_cards, player_cards, similar_cards)))
 
 def get_recommended_decks(player_stats):
-    player_cards = list(player_stats["stats"]["cards"].keys())
-    player_decks_decoded = [decode(deck) for deck in player_stats["stats"]["decks"].keys()]
+    top_player_decks = sorted(player_stats["stats"]["decks"].keys(), key=lambda x: x['uses'])
+    player_decks_decoded = [decode(deck) for deck in top_player_decks[0:5]]
     top_decks = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
     top_decks_decoded = [decode(deck) for deck in top_decks]
     top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks])
