@@ -49,11 +49,11 @@ def get_recommended_decks(player_stats):
 def get_player_stats(playerID):	
     player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
     card_json = get_card_json()
-    region_stats = region_stats(player_stats["stats"]["cards"], card_json)
+    regions = region_stats(player_stats["stats"]["cards"], card_json)
     (top_decks, recommended_decks) = get_recommended_decks(player_stats)
     (playstyle, playstyle_winning) = player_analytics(player_stats["stats"]["decks"], card_json)
     output = {}
-    output.update(region_stats)
+    output.update(regions)
     output['popular_decks'] = top_decks
     output['recommended_decks'] = recommended_decks
     output['playstyle'] = playstyle
