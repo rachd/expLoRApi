@@ -1,11 +1,6 @@
 import json
 
 
-def load_data():
-    with open("./explor/data/similar_cards.json", "r") as input_file:
-        return json.load(input_file)
-
-
 def get_champion_count(data):
     return len([code for code in data.keys() if data[code]['rarity'] == 'Champion'])
 
@@ -22,12 +17,10 @@ def get_3_copy_cards(deck):
 
 def filter_cards(deck, codes, player_cards):
     full_cards = get_3_copy_cards(codes)
-    print(full_cards)
     return [code for code in codes if code in player_cards]
 
 
-def get_similar_cards(deck, missing_cards, player_cards):
-    data = load_data()
+def get_similar_cards(deck, missing_cards, player_cards, data):
     output = []
     for card in missing_cards:
         recommendations = ([datum[0] for datum in data[card]])

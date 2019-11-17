@@ -1,4 +1,4 @@
-#!/home/rachel/expLoR/env/bin/python
+#!/home/ubuntu/expLoRApi/env/bin/python
 # EASY-INSTALL-ENTRY-SCRIPT: 'numpy==1.17.4','console_scripts','f2py3'
 __requires__ = 'numpy==1.17.4'
 import re

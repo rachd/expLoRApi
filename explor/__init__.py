@@ -8,11 +8,13 @@ from flask import Flask, request
 import requests
 app = Flask(__name__)
 
-
 def get_card_json():
     with app.open_resource("data/cards.json") as input_json:
         return json.load(input_json)
 
+def get_similar_cards_json():
+    with app.open_resource("data/similar_cards.json") as input_json:
+        return json.load(input_json)
 
 @app.route("/deck-stats", methods=['POST'])
 def deck_stats():
@@ -29,7 +31,8 @@ def suggest_cards():
     player_stats = requests.get(
         'http://ec2-54-85-199-0.compute-1.amazonaws.com/api/players/stats?player_name='+player_id).json()
     player_cards = list(player_stats["stats"]["cards"].keys())
-    return json.dumps(get_similar_cards(decode(deck), missing_cards, player_cards))
+    similar_cards = get_similar_cards_json()
+    return json.dumps(get_similar_cards(decode(deck), missing_cards, player_cards, similar_cards))
 
 def get_recommended_decks(player_stats):
     player_cards = list(player_stats["stats"]["cards"].keys())
@@ -43,7 +46,7 @@ def get_recommended_decks(player_stats):
     return (top_recommendations, all_cards_recommendations)
 
 @app.route("/player-stats/<playerID>", methods=['GET'])
-def get_player_stats(playerID):
+def get_player_stats(playerID):	
     player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com/api/players/stats?player_name='+playerID).json()
     # playstyle, regions, top deck recommendations, all your cards recommendations
     # also include top cards and top champs?

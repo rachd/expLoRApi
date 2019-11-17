@@ -2,8 +2,10 @@ setup.py
 explor/__init__.py
 explor/deckstats.py
 explor/helpers.py
+explor/playerstats.py
 explor/recommend.py
 explor/similarCards.py
+explor/train.py
 explor.egg-info/PKG-INFO
 explor.egg-info/SOURCES.txt
 explor.egg-info/dependency_links.txt
