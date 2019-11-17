@@ -58,4 +58,4 @@ def get_player_stats(playerID):
     output['recommended_decks'] = recommended_decks
     output['playstyle'] = playstyle
     output['playstyle_winning'] = playstyle_winning
-    return response_to_json(json.dumps(output)
+    return response_to_json(json.dumps(output))
