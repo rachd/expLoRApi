@@ -1,5 +1,6 @@
 def get_max(obj):
-    return max(obj.iterkeys(), key=(lambda key: obj[key]))
+    keys = obj.keys()
+    return max(keys, key=(lambda key: obj[key]))
 
 def format_region(region, total):
     return {
