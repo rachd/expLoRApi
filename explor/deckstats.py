@@ -86,9 +86,14 @@ def get_stats(cards, keyword_only=False):
 
 def player_analytics(player_history, card_json):
     decks_with_cards = []
+    winning_decks_with_cards = []
     for deck in player_history.keys():
-        decks_with_cards.append(get_cards_info(deck, card_json))
-    return get_stats(get_all_cards(decks_with_cards))
+        cards_info = get_cards_info(deck, card_json)
+        for count in range(player_history[deck]["wins"]):
+            winning_decks_with_cards.append(cards_info)
+        for count in range(player_history[deck]["uses"]):
+            decks_with_cards.append(cards_info)
+    return {"all": get_stats(get_all_cards(decks_with_cards)), "winning": get_stats(get_all_cards(winning_decks_with_cards))}
 
 
 def deck_analytics(decks, card_json):
