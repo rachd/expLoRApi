@@ -36,7 +36,7 @@ def get_keyword_counts(cards, keyword_only):
         if keyword_only:
             output.append(key)
         else:
-            output.append(key + " keyword")
+            output.append(key + " cards")
     return output
 
 
@@ -51,7 +51,7 @@ def analyze_mana_curve(cards):
         playstyle = "High"
     else:
         playstyle = "Balanced"
-    return [playstyle + " mana costs"]
+    return [playstyle + " mana curve decks"]
 
 
 def analyze_type_percentage(cards, keyword_only):
@@ -73,7 +73,7 @@ def analyze_type_percentage(cards, keyword_only):
     if keyword_only:
         return tags
     else:
-        return [tag + " count" for tag in tags]
+        return [tag + " count decks" for tag in tags]
 
 
 def get_stats(cards, keyword_only=False):
