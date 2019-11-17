@@ -2,7 +2,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from explor.helpers import encode
 
-def recommend_decks(player_decks, all_top_decks):
+def recommend_decks(player_decks, all_top_decks, scores):
     top_decks = [deck for deck in all_top_decks if not deck in player_decks]
     if len(top_decks) < 4:
         return top_decks
@@ -29,5 +29,5 @@ def recommend_decks(player_decks, all_top_decks):
         if not sorted_sims[i]["j"] in recommendations:
             recommendations.append(sorted_sims[i]["j"])
         i += 1
-    recommendations = [top_decks[i] for i in recommendations]
-    return [encode(recommendation) for recommendation in recommendations]
+    recommendations = [{'deck': top_decks[i], 'score': scores[i]} for i in recommendations]
+    return [{'deck': encode(recommendation['deck']), 'score': recommendation['score']} for recommendation in recommendations]

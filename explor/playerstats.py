@@ -1,32 +1,50 @@
-import json
+def get_max(obj):
+    return max(obj.iterkeys(), key=(lambda key: obj[key]))
 
-def get_top_3(object_to_sort):
-    return sorted(object_to_sort, key=object_to_sort.get, reverse=True)[0:3]
+def format_region(region, total):
+    return {
+        'title': region['title'],
+        'ref': region['ref'],
+        'percent': int(region['count'] / total)
+    }
 
-def top_cards(card_stats, card_json):
+def region_stats(card_stats, card_json):
     all_games = {}
     winning = {}
-    champs = {}
-    winning_champs = {}
     regions = {}
     winning_regions = {}
     for card in card_stats.keys():
         card_info = card_json[card]
         wins = card_stats[card]['wins']
         losses = card_stats[card]['losses']
-        if card_info['rarity'] == 'Champion':
-            champs[card] = wins + losses
-            winning_champs[card] = wins
-        else:
-            all_games[card] = wins + losses
-            winning[card] = wins
+        all_games[card] = wins + losses
+        winning[card] = wins
 
         region = card_info['region']
+        regionRef = card_info['regionRef']
         if region in regions.keys():
-            regions[region] += wins + losses
-            winning_regions[region] += wins
+            regions[region]['count'] += wins + losses
+            winning_regions[region]['count'] += wins
         else:
-            regions[region] = wins + losses
-            winning_regions[region] = wins
-    return ({'all': regions, 'winning': winning_regions}, {'all_games': get_top_3(all_games), 'winning': get_top_3(winning), 'champs': get_top_3(champs), 'winning_champs': get_top_3(winning_champs)})
+            regions[region] = {'title': region, 'ref': regionRef, 'count': wins + losses}
+            winning_regions[region] = {'title': region, 'ref': regionRef, 'count': wins}
 
+    top_card = get_max(all_games)
+    top_card_winning = get_max(winning)
+    
+    region_percents = [format_region(regions[region]) for region in regions.keys()]
+    region_percents_winning = [format_region(winning_regions[region]) for region in winning_regions.keys()]
+
+    top_region = max(region_percents, key=lambda item: item['percent'])
+    top_region_winning = max(region_percents_winning, key=lambda item: item['percent'])
+    return ({
+        'most_played_card_code': top_card, 
+        'most_played_card_code_winning': top_card_winning, 
+        'most_played_region': top_region, 
+        'most_played_region_winning': top_region_winning, 
+        'region_play': region_percents, 
+        'region_play_winning': region_percents_winning
+    })
+
+def recent_matches(player_stats):
+    return []

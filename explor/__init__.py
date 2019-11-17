@@ -2,7 +2,7 @@ from explor.deckstats import deck_analytics, player_analytics
 from explor.similarCards import get_similar_cards
 from explor.helpers import decode
 from explor.recommend import recommend_decks
-from explor.playerstats import top_cards
+from explor.playerstats import region_stats
 import json
 from flask import Flask, request, Response
 import requests
@@ -32,7 +32,7 @@ def suggest_cards():
     player_id = request.json['player_id']
     missing_cards = request.json['missing_cards']
     player_stats = requests.get(
-        'http://ec2-54-85-199-0.compute-1.amazonaws.com/api/players/stats?player_name='+player_id).json()
+        'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+player_id).json()
     player_cards = list(player_stats["stats"]["cards"].keys())
     similar_cards = get_similar_cards_json()
     return response_to_json(json.dumps(get_similar_cards(decode(deck), missing_cards, player_cards, similar_cards)))
@@ -40,21 +40,22 @@ def suggest_cards():
 def get_recommended_decks(player_stats):
     player_cards = list(player_stats["stats"]["cards"].keys())
     player_decks_decoded = [decode(deck) for deck in player_stats["stats"]["decks"].keys()]
-    top_decks = []#requests.get('').json()   FETCH TOP 100 DECKS
-    top_all_cards = [] #requests.get('').json() FETCH TOP 100 DECKS WHERE ALL CARDS IN PLAYER's CARDS
+    top_decks = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
     top_decks_decoded = [decode(deck) for deck in top_decks]
-    top_all_cards_decoded = [decode(deck) for deck in top_all_cards]
-    top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded)
-    all_cards_recommendations = recommend_decks(player_decks_decoded, top_all_cards_decoded)
-    return (top_recommendations, all_cards_recommendations)
+    top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks])
+    return (top_decks[0:3], top_recommendations)
 
 @app.route("/player-stats/<playerID>", methods=['GET'])
 def get_player_stats(playerID):	
-    player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com/api/players/stats?player_name='+playerID).json()
-    # playstyle, regions, top deck recommendations, all your cards recommendations
-    # also include top cards and top champs?
+    player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
     card_json = get_card_json()
-    (region_stats, cards_stats) = top_cards(player_stats["stats"]["cards"], card_json)
-    (top_recommendations, all_cards_recommendations) = get_recommended_decks(player_stats)
-    playstyle = player_analytics(player_stats["stats"]["decks"], card_json)
-    return response_to_json(json.dumps({'playstyle': playstyle, 'cards': cards_stats, 'regions': region_stats, 'top_recommendations': top_recommendations, 'all_card_recommendations': all_cards_recommendations}))
+    region_stats = region_stats(player_stats["stats"]["cards"], card_json)
+    (top_decks, recommended_decks) = get_recommended_decks(player_stats)
+    (playstyle, playstyle_winning) = player_analytics(player_stats["stats"]["decks"], card_json)
+    output = {}
+    output.update(region_stats)
+    output['popular_decks'] = top_decks
+    output['recommended_decks'] = recommended_decks
+    output['playstyle'] = playstyle
+    output['playstyle_winning'] = playstyle_winning
+    return response_to_json(json.dumps(output)
