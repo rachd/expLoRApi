@@ -38,12 +38,13 @@ def suggest_cards():
     return response_to_json(json.dumps(get_similar_cards(decode(deck), missing_cards, player_cards, similar_cards)))
 
 def get_recommended_decks(player_stats):
-    top_player_decks = sorted(player_stats["stats"]["decks"].keys(), key=lambda x: x['uses'])
+    player_decks = player_stats["stats"]["decks"]
+    top_player_decks = sorted(player_decks.keys(), key=(lambda x: player_decks[x]["uses"]))
     player_decks_decoded = [decode(deck) for deck in top_player_decks[0:5]]
     top_decks = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
-    top_decks_decoded = [decode(deck) for deck in top_decks]
-    top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks])
-    return (top_decks[0:3], top_recommendations)
+    top_decks_decoded = [decode(deck['deck_code']) for deck in top_decks["top_decks"]]
+    top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks["top_decks"]])
+    return (top_decks["top_decks"][0:3], top_recommendations)
 
 @app.route("/player-stats/<playerID>", methods=['GET'])
 def get_player_stats(playerID):	
