@@ -33,8 +33,9 @@ def region_stats(card_stats, card_json):
     top_card = get_max(all_games)
     top_card_winning = get_max(winning)
     
-    region_percents = [format_region(regions[region]) for region in regions.keys()]
-    region_percents_winning = [format_region(winning_regions[region]) for region in winning_regions.keys()]
+    total_cards = len(card_stats.keys())
+    region_percents = [format_region(regions[region], total_cards) for region in regions.keys()]
+    region_percents_winning = [format_region(winning_regions[region], total_cards) for region in winning_regions.keys()]
 
     top_region = max(region_percents, key=lambda item: item['percent'])
     top_region_winning = max(region_percents_winning, key=lambda item: item['percent'])
