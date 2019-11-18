@@ -6,7 +6,7 @@ def format_region(region, total):
     return {
         'title': region['title'],
         'ref': region['ref'],
-        'percent': int(region['count'] / total)
+        'percent': int((region['count'] / total) * 100)
     }
 
 def region_stats(card_stats, card_json):
