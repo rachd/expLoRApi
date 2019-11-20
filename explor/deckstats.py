@@ -103,7 +103,9 @@ def deck_analytics(deck, card_json):
 def get_regions(deck, card_json):
     deck_data = get_cards_info(deck, card_json)
     regions = []
+    region_refs = []
     for card in deck_data:
-        if not card['regionRef'] in regions:
+        if not card['regionRef'] in region_refs:
             regions.append({'region': card['region'], 'regionRef': card['regionRef']})
+            region_refs.append(card['regionRef'])
     return regions
