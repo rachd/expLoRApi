@@ -15,9 +15,9 @@ def get_card_json():
 
 @app.route("/deck-stats", methods=['POST'])
 def deck_stats():
-    deck_codes = request.json['deck_codes']
+    deck_code = request.json['deck_code']
     card_json = get_card_json()
-    return json.dumps({"keywords": deck_analytics(deck_codes, card_json)})
+    return json.dumps({"keywords": deck_analytics(deck_code, card_json)})
 
 
 @app.route("/suggested-cards", methods=['POST'])

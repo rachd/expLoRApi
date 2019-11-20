@@ -96,9 +96,6 @@ def player_analytics(player_history, card_json):
     return (get_stats(get_all_cards(decks_with_cards)), get_stats(get_all_cards(winning_decks_with_cards)))
 
 
-def deck_analytics(decks, card_json):
-    all_stats = []
-    for deck in decks:
-        deck_data = get_cards_info(deck, card_json)
-        all_stats.append(get_stats(deck_data, True))
-    return all_stats
+def deck_analytics(deck, card_json):
+    deck_data = get_cards_info(deck, card_json)
+    return get_stats(deck_data, True)

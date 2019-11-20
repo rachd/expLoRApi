@@ -21,9 +21,9 @@ def response_to_json(out_obj):
 
 @app.route("/deck-stats", methods=['POST'])
 def deck_stats():
-    deck_codes = request.json['deck_codes']
+    deck_code = request.json['deck_code']
     card_json = get_card_json()
-    return response_to_json(json.dumps({"keywords": deck_analytics(deck_codes, card_json)}))
+    return response_to_json(json.dumps({"keywords": deck_analytics(deck_code, card_json)}))
 
 
 @app.route("/suggested-cards", methods=['POST'])
@@ -67,7 +67,7 @@ def submit_match():
     player_id = request.json['player_id']
     result = request.json['result']
     card_json = get_card_json()
-    deck_stats = deck_analytics(deck_codes, card_json)
+    deck_stats = deck_analytics(deck, card_json)
     decoded_deck = get_card_array(deck)
     return response_to_json(json.dumps({
         "deck_code": deck,
