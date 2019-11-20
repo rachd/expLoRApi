@@ -1,6 +1,6 @@
 from explor.deckstats import deck_analytics, player_analytics
 from explor.similarCards import get_similar_cards
-from explor.helpers import decode
+from explor.helpers import decode, get_card_array
 from explor.recommend import recommend_decks
 from explor.playerstats import region_stats
 import json
@@ -60,3 +60,19 @@ def get_player_stats(playerID):
     output['playstyle'] = playstyle
     output['playstyle_winning'] = playstyle_winning
     return response_to_json(json.dumps(output))
+
+@app.route("/submit-match", ['POST'])
+def submit_match():
+    deck = request.json['deck_code']
+    player_id = request.json['player_id']
+    result = request.json['result']
+    card_json = get_card_json()
+    deck_stats = deck_analytics(deck_codes, card_json)
+    decoded_deck = get_card_array(deck)
+    return response_to_json(json.dumps({
+        "deck_code": deck,
+        "player_id": player_id,
+        "result": result,
+        "cards": decoded_deck,
+        "keywords": deck_stats
+    }))

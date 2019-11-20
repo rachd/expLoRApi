@@ -9,6 +9,13 @@ def decode(deck):
             cards.append(code[2:])
     return " ".join(cards)
 
+def get_card_array(deck):
+    codes = list(LoRDeck.from_deckcode(deck))
+    cards = []
+    for code in codes:
+        cards.append(code[2:])
+    return cards
+
 def get_all_cards(decks):
     all_cards = []
     for deck in decks:
