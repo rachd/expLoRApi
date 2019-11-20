@@ -75,7 +75,7 @@ def get_player_stats(playerID):
     except:
         return {}
 
-@app.route("bookmark/<playerID>", methods=['GET'])
+@app.route("/bookmark/<playerID>", methods=['GET'])
 def get_bookmarks(playerID):
     try:
         # TODO hit brandon's endpoint to get bookmarks for player
@@ -83,7 +83,7 @@ def get_bookmarks(playerID):
     except:
         pass
 
-@app.route("bookmark", methods=['POST'])
+@app.route("/bookmark", methods=['POST'])
 def bookmark():
     try:
         deck = request.json['deck_code']
