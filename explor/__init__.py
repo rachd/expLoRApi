@@ -61,7 +61,7 @@ def get_player_stats(playerID):
     output['playstyle_winning'] = playstyle_winning
     return response_to_json(json.dumps(output))
 
-@app.route("/submit-match", ['POST'])
+@app.route("/submit-match", methods=['POST'])
 def submit_match():
     deck = request.json['deck_code']
     player_id = request.json['player_id']
