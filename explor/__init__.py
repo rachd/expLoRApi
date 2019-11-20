@@ -1,4 +1,4 @@
-from explor.deckstats import deck_analytics, player_analytics
+from explor.deckstats import deck_analytics, player_analytics, get_regions
 from explor.similarCards import get_similar_cards
 from explor.helpers import decode, get_card_array
 from explor.recommend import recommend_decks
@@ -69,10 +69,12 @@ def submit_match():
     card_json = get_card_json()
     deck_stats = deck_analytics(deck, card_json)
     decoded_deck = get_card_array(deck)
+    regions = get_regions(deck, card_json)
     return response_to_json(json.dumps({
         "deck_code": deck,
         "player_id": player_id,
         "result": result,
+        "regions": regions,
         "cards": decoded_deck,
-        "keywords": deck_stats
+        "keywords": deck_stats,
     }))
