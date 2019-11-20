@@ -100,7 +100,7 @@ def deck_analytics(deck, card_json):
     deck_data = get_cards_info(deck, card_json)
     return get_stats(deck_data, True)
 
-def get_regions(deck, card_json)
+def get_regions(deck, card_json):
     deck_data = get_cards_info(deck, card_json)
     regions = []
     for card in deck_data:
