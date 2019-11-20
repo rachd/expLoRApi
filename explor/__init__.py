@@ -100,10 +100,12 @@ def get_profile(playerID):
         card_json = get_card_json()
         player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
         match_history = player_stats["stats"]["match_history"]
-        output["match_history"] = [match.update({"deck_tags": deck_analytics(deck, card_json)}) for match in match_history]
-        top_decks = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
+        for match in match_history:
+            match.update({"deck_tags": deck_analytics(match["deck"], card_json)})
+        output["match_history"] = match_history
+        top_decks = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=20').json()
         bookmarks = [] #TODO get bookmarks
-        output["decks"] = {"most_popular": top_decks, "bookmarks": bookmarks}
+        output["decks"] = {"most_popular": top_decks["top_decks"], "bookmarks": bookmarks}
         return response_to_json(json.dumps(output))
     except:
         return {}
