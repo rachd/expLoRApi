@@ -5,8 +5,10 @@ from explor.recommend import recommend_decks
 from explor.playerstats import region_stats
 import json
 from flask import Flask, request, Response
+from flask_restplus import Api
 import requests
 app = Flask(__name__)
+api = Api(app)
 
 def get_card_json():
     with app.open_resource("data/cards.json") as input_json:
@@ -66,11 +68,44 @@ def get_player_stats(playerID):
         output.update(regions)
         output['popular_decks'] = top_decks
         output['recommended_decks'] = recommended_decks
+        output['match_history'] = player_stats["stats"]["match_history"]
         output['playstyle'] = playstyle
         output['playstyle_winning'] = playstyle_winning
         return response_to_json(json.dumps(output))
     except:
         return {}
+
+@app.route("bookmark/<playerID>", methods=['GET'])
+def get_bookmarks(playerID):
+    try:
+        # TODO hit brandon's endpoint to get bookmarks for player
+        return {}
+    except:
+        pass
+
+@app.route("bookmark", methods=['POST'])
+def bookmark():
+    try:
+        deck = request.json['deck_code']
+        player_id = request.json['player_id']
+        # TODO hit brandon's endpoint to save bookmark
+        return response_to_json(json.dumps({"deck": deck}))
+    except:
+        pass
+
+@app.route("/profile/<playerID>", methods=['GET'])
+def get_profile(playerID):
+    try:
+        output = {}
+        card_json = get_card_json()
+        player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
+        match_history = player_stats["stats"]["match_history"]
+        output["match_history"] = [match.update({"deck_tags": deck_analytics(deck, card_json)}) for match in match_history]
+        return response_to_json(json.dumps(output))
+    except:
+        return {}
+
+# TODO put in GET and POST card library endpoints
 
 @app.route("/submit-match", methods=['POST'])
 def submit_match():
@@ -78,6 +113,7 @@ def submit_match():
         deck = request.json['deck_code']
         player_id = request.json['player_id']
         result = request.json['result']
+        opponent = request.json['opponent']
         card_json = get_card_json()
         deck_stats = deck_analytics(deck, card_json)
         decoded_deck = get_card_array(deck)
@@ -85,11 +121,12 @@ def submit_match():
         json_output = response_to_json(json.dumps({
             "deck_code": deck,
             "player_id": player_id,
+            'opponent': opponent,
             "result": result,
             "regions": regions,
             "cards": decoded_deck,
             "keywords": deck_stats,
         }))
-        # pass json_output to brandon's endpoint
+        # TODO pass json_output to brandon's endpoint
     except:
         pass
