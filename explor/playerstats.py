@@ -14,11 +14,13 @@ def region_stats(card_stats, card_json):
     winning = {}
     regions = {}
     winning_regions = {}
+    total_cards = 0
     for card in card_stats.keys():
         card_info = card_json[card]
         wins = card_stats[card]['wins']
         losses = card_stats[card]['losses']
         all_games[card] = wins + losses
+        total_cards += (wins + losses)
         winning[card] = wins
 
         region = card_info['region']
@@ -29,11 +31,10 @@ def region_stats(card_stats, card_json):
         else:
             regions[region] = {'title': region, 'ref': regionRef, 'count': wins + losses}
             winning_regions[region] = {'title': region, 'ref': regionRef, 'count': wins}
-
+    
     top_card = get_max(all_games)
     top_card_winning = get_max(winning)
     
-    total_cards = len(card_stats.keys())
     region_percents = [format_region(regions[region], total_cards) for region in regions.keys()]
     region_percents_winning = [format_region(winning_regions[region], total_cards) for region in winning_regions.keys()]
 
