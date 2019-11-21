@@ -51,7 +51,7 @@ def get_recommended_decks(player_stats):
         player_decks_decoded = [decode(deck) for deck in top_player_decks[0:5]]
         top_decks = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
         top_decks_decoded = [decode(deck['deck_code']) for deck in top_decks["top_decks"]]
-        top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks["top_decks"]], True)
+        top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks["top_decks"]])
         return (top_decks["top_decks"][0:3], top_recommendations)
     except:
         return {}
@@ -132,7 +132,7 @@ def submit_match():
         deck_stats = deck_analytics(deck, card_json)
         decoded_deck = get_card_array(deck)
         regions = get_regions(deck, card_json)
-        json_output = response_to_json(json.dumps({
+        output = {
             "deck_code": deck,
             "player_id": player_id,
             'opponent': opponent,
@@ -140,8 +140,8 @@ def submit_match():
             "regions": regions,
             "cards": decoded_deck,
             "keywords": deck_stats,
-        }))
-        # TODO pass json_output to brandon's endpoint
+        }
+        requests.post('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/record-match', data = output)
         return response_to_json(json.dumps({"status": "Success"}))
     except:
         return response_to_json(json.dumps({"status": "Fail"}))
