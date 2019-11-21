@@ -111,6 +111,14 @@ def get_profile(playerID):
         return {}
 
 # TODO put in GET and POST card library endpoints
+@app.route("/cards/<playerID>", methods=['GET, POST'])
+def player_cards(playerID):
+    if request.method == 'GET':
+        return []
+    elif request.method == 'POST':
+        card = request.json['card']
+        count = request.json['count']
+        return []
 
 @app.route("/submit-match", methods=['POST'])
 def submit_match():
@@ -135,3 +143,14 @@ def submit_match():
         # TODO pass json_output to brandon's endpoint
     except:
         pass
+
+@app.route("/suggest-decks", methods=["POST"])
+def suggest_decks():
+    try:
+        required_cards = request.json['required_cards']
+        required_keywords = request.json['required_keywords']
+        player_cards = request.json['player_cards']
+        player_id = request.json['player_id']
+        # TODO pass params to brandon's endpoint and get results back
+    except:
+        return {}
