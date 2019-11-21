@@ -24,9 +24,9 @@ def recommend_decks(player_decks, all_top_decks, scores, top_3_only):
             if not sorted_sims[i]["j"] in recommendations:
                 recommendations.append(sorted_sims[i]["j"])
             i += 1
-    recommendations = [{'deck': top_decks[i], 'score': scores[i]} for i in recommendations]
     else:
         for i in range(len(sorted_sims)):
             if not sorted_sims[i]["j"] in recommendations:
                 recommendations.append(sorted_sims[i]["j"])
+    recommendations = [{'deck': top_decks[i], 'score': scores[i]} for i in recommendations]
     return [{'deck': encode(recommendation['deck']), 'score': recommendation['score']} for recommendation in recommendations]
