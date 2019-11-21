@@ -114,11 +114,12 @@ def get_profile(playerID):
 @app.route("/cards/<playerID>", methods=['GET', 'POST'])
 def player_cards(playerID):
     if request.method == 'GET':
-        return []
+        cards = []
+        return response_to_json(json.dumps({"cards": cards}))
     elif request.method == 'POST':
         card = request.json['card']
         count = request.json['count']
-        return []
+        return response_to_json(json.dumps({"status": "Success"}))
 
 @app.route("/submit-match", methods=['POST'])
 def submit_match():
@@ -151,6 +152,8 @@ def suggest_decks():
         required_keywords = request.json['required_keywords']
         player_cards = request.json['player_cards']
         player_id = request.json['player_id']
+        # get top 100 decks matching the parameters
+        # do cosine similarity between each of these
         # TODO pass params to brandon's endpoint and get results back
     except:
         return {}
