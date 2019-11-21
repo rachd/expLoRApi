@@ -111,7 +111,7 @@ def get_profile(playerID):
         return {}
 
 # TODO put in GET and POST card library endpoints
-@app.route("/cards/<playerID>", methods=['GET, POST'])
+@app.route("/cards/<playerID>", methods=['GET', 'POST'])
 def player_cards(playerID):
     if request.method == 'GET':
         return []
