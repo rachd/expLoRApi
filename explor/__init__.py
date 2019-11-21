@@ -89,9 +89,9 @@ def bookmark():
         deck = request.json['deck_code']
         player_id = request.json['player_id']
         # TODO hit brandon's endpoint to save bookmark
-        return response_to_json(json.dumps({"deck": deck}))
+        return response_to_json(json.dumps({"status": "Success"}))
     except:
-        pass
+        return response_to_json(json.dumps({"status": "Fail"}))
 
 @app.route("/profile/<playerID>", methods=['GET'])
 def get_profile(playerID):
@@ -142,8 +142,9 @@ def submit_match():
             "keywords": deck_stats,
         }))
         # TODO pass json_output to brandon's endpoint
+        return response_to_json(json.dumps({"status": "Success"}))
     except:
-        pass
+        return response_to_json(json.dumps({"status": "Fail"}))
 
 @app.route("/suggest-decks", methods=["POST"])
 def suggest_decks():
