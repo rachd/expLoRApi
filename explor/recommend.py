@@ -24,4 +24,4 @@ def recommend_decks(player_decks, all_top_decks, scores):
             recommendations.append(sorted_sims[i]["j"])
         i += 1
     recommendations = [{'deck': top_decks[i], 'score': scores[i]} for i in recommendations]
-    return [{'deck': encode(recommendation['deck']), 'grade': recommendation['score']} for recommendation in recommendations]
+    return [{'deck': encode(recommendation['deck']), 'score': recommendation['score']} for recommendation in recommendations]
