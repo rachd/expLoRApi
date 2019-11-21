@@ -154,8 +154,6 @@ def suggest_decks():
         player_id = request.json['player_id']
         # TODO get top 100 decks matching the parameters
         top_decks = []
-        top_decks_decoded = [decode(deck['deck_code']) for deck in top_decks["top_decks"]]
-        top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks["top_decks"]], False)
-        return response_to_json(json.dumps({"decks": top_recommendations}))
+        return response_to_json(json.dumps({"decks": top_decks}))
     except:
         return {}
