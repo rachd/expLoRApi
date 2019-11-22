@@ -154,16 +154,16 @@ def submit_match():
             "result": result,
             "regions": regions,
             "cards": decoded_deck,
-            "keywords": deck_stats,
+            "keywords": deck_stats
         }
         result = requests.post(
-            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/record-match', data=output)
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/record-match', json=output)
         if result.status_code == 201:
             return response_to_json(json.dumps({"status": "Success"}))
         else:
             return response_to_json(json.dumps({"status": "Fail"}))
     except:
-        return response_to_json(json.dumps({"status": "Fail"}))
+        return response_to_json(json.dumps({"status": "Fail Except"}))
 
 
 @app.route("/suggest-decks", methods=["POST"])
@@ -173,8 +173,14 @@ def suggest_decks():
         required_keywords = request.json['required_keywords']
         player_cards = request.json['player_cards']
         player_id = request.json['player_id']
-        # TODO get top 100 decks matching the parameters
-        top_decks = []
-        return response_to_json(json.dumps({"decks": top_decks}))
+        filters = {
+            "required_cards": required_cards,
+            "required_keywords": required_keywords,
+            "player_cards": player_cards,
+            "player_id": player_id
+        }
+        top_decks = requests.post(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks/filter', json=filters)
+        return response_to_json(json.dumps({"decks": top_decks.text}))
     except:
         return {}
