@@ -1,5 +1,4 @@
 from explor.deckstats import deck_analytics, player_analytics, get_regions
-from explor.similarCards import get_similar_cards
 from explor.helpers import decode, get_card_array
 from explor.recommend import recommend_decks
 from explor.playerstats import region_stats
@@ -25,31 +24,6 @@ def response_to_json(out_obj):
     return Response(out_obj, mimetype='application/json')
 
 
-@app.route("/deck-stats", methods=['POST'])
-def deck_stats():
-    try:
-        deck_code = request.json['deck_code']
-        card_json = get_card_json()
-        return response_to_json(json.dumps({"keywords": deck_analytics(deck_code, card_json)}))
-    except:
-        return {}
-
-
-@app.route("/suggested-cards", methods=['POST'])
-def suggest_cards():
-    try:
-        deck = request.json['deck_code']
-        player_id = request.json['player_id']
-        missing_cards = request.json['missing_cards']
-        player_stats = requests.get(
-            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+player_id).json()
-        player_cards = list(player_stats["stats"]["cards"].keys())
-        similar_cards = get_similar_cards_json()
-        return response_to_json(json.dumps(get_similar_cards(decode(deck), missing_cards, player_cards, similar_cards)))
-    except:
-        return {}
-
-
 def get_recommended_decks(player_stats):
     try:
         player_decks = player_stats["stats"]["decks"]
@@ -64,8 +38,8 @@ def get_recommended_decks(player_stats):
             deck for deck in top_decks if not deck["deck_code"] in player_deck_codes]
         top_decks_decoded = [decode(deck['deck_code'])
                              for deck in top_decks_filtered]
-        top_recommendations = []#recommend_decks(player_decks_decoded, top_decks_decoded, [
-                                 #             deck['score'] for deck in top_decks_filtered])
+        top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [
+            deck['score'] for deck in top_decks_filtered])
         return (top_decks[0:3], top_recommendations)
     except:
         return {}
@@ -130,9 +104,10 @@ def get_profile(playerID):
         output["match_history"] = match_history
         top_decks = requests.get(
             'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=20').json()
-        bookmarks = []  # TODO get bookmarks
+        bookmarks = requests.get(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks?player_name='+playerID).json()
         output["decks"] = {
-            "most_popular": top_decks["top_decks"], "bookmarks": bookmarks}
+            "most_popular": top_decks["top_decks"], "bookmarks": bookmarks["decks"]}
         return response_to_json(json.dumps(output))
     except:
         return {}

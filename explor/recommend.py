@@ -10,7 +10,7 @@ def recommend_decks(player_decks, top_decks, scores):
     vectorizer = TfidfVectorizer()
     all_vectors = vectorizer.fit_transform(top_decks + player_decks)
     cosine_similarities = cosine_similarity(all_vectors)
-    player_sims = cosine_similarities[len(top_decks)]
+    player_sims = cosine_similarities[:len(top_decks)]
     all_sims = []
     for i in range(len(player_sims)):
         for j in range(len(top_decks)):
