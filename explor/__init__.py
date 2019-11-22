@@ -181,6 +181,6 @@ def suggest_decks():
         }
         top_decks = requests.post(
             'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks/filter', json=filters)
-        return response_to_json(json.dumps({"decks": top_decks.text}))
+        return response_to_json(json.dumps(top_decks.json()))
     except:
         return {}
