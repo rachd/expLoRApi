@@ -124,7 +124,7 @@ def player_cards(playerID):
         card = request.json['card']
         count = request.json['count']
         data_to_send = {'card_code': card, 'count': count, "player_name": playerID}
-        response = requests.post('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards/add', data=data_to_send)
+        response = requests.post('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards/add', data=data_to_send).json()
         return response_to_json(json.dumps(response))
 
 @app.route("/submit-match", methods=['POST'])
