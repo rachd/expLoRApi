@@ -53,18 +53,20 @@ def suggest_cards():
 def get_recommended_decks(player_stats):
     try:
         player_decks = player_stats["stats"]["decks"]
-        top_player_decks = sorted(player_decks.keys(), key=(
+        player_deck_codes = player_decks.keys()
+        top_player_decks = sorted(player_decks, key=(
             lambda x: player_decks[x]["uses"]))
         player_decks_decoded = [decode(deck) for deck in top_player_decks[0:5]]
         deck_data = requests.get(
             'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
-        top_decks = top_decks["top_decks"]
-        top_decks_filtered = [deck["deck"] for deck in top_decks]
-        # top_decks_decoded = [deck for deck in top_decks if not deck in player_decks]
-        # top_decks_decoded = [decode(deck['deck_code']) for deck in top_decks if not deck in player_decks]
-        # top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks])
-        return (player_decks.keys(), top_decks)
-        # return (top_decks[0:3], top_recommendations)
+        top_decks = deck_data["top_decks"]
+        top_decks_filtered = [
+            deck for deck in top_decks if not deck["deck_code"] in player_deck_codes]
+        top_decks_decoded = [decode(deck['deck_code'])
+                             for deck in top_decks_filtered]
+        top_recommendations = []#recommend_decks(player_decks_decoded, top_decks_decoded, [
+                                 #             deck['score'] for deck in top_decks_filtered])
+        return (top_decks[0:3], top_recommendations)
     except:
         return {}
 
@@ -76,8 +78,7 @@ def get_player_stats(playerID):
             'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
         card_json = get_card_json()
         regions = region_stats(player_stats["stats"]["cards"], card_json)
-        # get_recommended_decks(player_stats)
-        (top_decks, recommended_decks) = ([], [])
+        (top_decks, recommended_decks) = get_recommended_decks(player_stats)
         (playstyle, playstyle_winning) = player_analytics(
             player_stats["stats"]["decks"], card_json)
         output = {}
@@ -92,24 +93,27 @@ def get_player_stats(playerID):
         return {}
 
 
-@app.route("/bookmark/<playerID>", methods=['GET'])
-def get_bookmarks(playerID):
-    try:
-        # TODO hit brandon's endpoint to get bookmarks for player
-        return {}
-    except:
-        pass
-
-
-@app.route("/bookmark", methods=['POST'])
-def bookmark():
-    try:
+@app.route("/bookmarks/<playerID>", methods=['GET', 'POST'])
+def bookmarks(playerID):
+    if request.method == 'GET':
+        bookmarks = requests.get(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks?player_name='+playerID).json()
+        return response_to_json(json.dumps({"bookmarks": bookmarks["decks"]}))
+    elif request.method == 'POST':
         deck = request.json['deck_code']
-        player_id = request.json['player_id']
-        # TODO hit brandon's endpoint to save bookmark
-        return response_to_json(json.dumps({"status": "Success"}))
-    except:
-        return response_to_json(json.dumps({"status": "Fail"}))
+        status = request.json['status']
+        data_to_send = {"deck_code": deck, "player_name": playerID}
+        result = {}
+        if status == 1:
+            result = requests.post(
+                'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks/favorite', data=data_to_send)
+        else:
+            result = requests.post(
+                "http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks/unfavorite", data=data_to_send)
+        if result.status_code == 201:
+            return response_to_json(json.dumps({"status": "Success"}))
+        else:
+            return response_to_json(json.dumps({"status": "Fail"}))
 
 
 @app.route("/profile/<playerID>", methods=['GET'])
@@ -133,7 +137,7 @@ def get_profile(playerID):
     except:
         return {}
 
-# TODO put in GET and POST card library endpoints
+
 @app.route("/cards/<playerID>", methods=['GET', 'POST'])
 def player_cards(playerID):
     if request.method == 'GET':
