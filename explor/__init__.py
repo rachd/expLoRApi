@@ -51,7 +51,7 @@ def get_recommended_decks(player_stats):
         player_decks_decoded = [decode(deck) for deck in top_player_decks[0:5]]
         deck_data = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
         top_decks = top_decks["top_decks"]
-        top_decks_filtered = [deck["deck"] for deck in top_decks if not deck["deck_code"] in ]
+        top_decks_filtered = [deck["deck"] for deck in top_decks]
         # top_decks_decoded = [deck for deck in top_decks if not deck in player_decks]
         # top_decks_decoded = [decode(deck['deck_code']) for deck in top_decks if not deck in player_decks]
         # top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks])
