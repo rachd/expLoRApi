@@ -24,6 +24,12 @@ def response_to_json(out_obj):
     return Response(out_obj, mimetype='application/json')
 
 
+def get_bookmarks(playerID):
+    bookmarks = requests.get(
+        'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks?player_name='+playerID).json()
+    return [{"deck_code": bookmark["code"]} for bookmark in bookmarks["decks"]]
+
+
 def get_recommended_decks(player_stats):
     try:
         player_decks = player_stats["stats"]["decks"]
@@ -70,9 +76,8 @@ def get_player_stats(playerID):
 @app.route("/bookmarks/<playerID>", methods=['GET', 'POST'])
 def bookmarks(playerID):
     if request.method == 'GET':
-        bookmarks = requests.get(
-            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks?player_name='+playerID).json()
-        return response_to_json(json.dumps({"bookmarks": bookmarks["decks"]}))
+        bookmarks = get_bookmarks(playerID)
+        return response_to_json(json.dumps({"bookmarks": bookmarks}))
     elif request.method == 'POST':
         deck = request.json['deck_code']
         status = request.json['status']
@@ -104,10 +109,9 @@ def get_profile(playerID):
         output["match_history"] = match_history
         top_decks = requests.get(
             'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=20').json()
-        bookmarks = requests.get(
-            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks?player_name='+playerID).json()
+        bookmarks = get_bookmarks(playerID)
         output["decks"] = {
-            "most_popular": top_decks["top_decks"], "bookmarks": bookmarks["decks"]}
+            "most_popular": top_decks["top_decks"], "bookmarks": bookmarks}
         return response_to_json(json.dumps(output))
     except:
         return {}
@@ -152,9 +156,12 @@ def submit_match():
             "cards": decoded_deck,
             "keywords": deck_stats,
         }
-        requests.post(
+        result = requests.post(
             'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/record-match', data=output)
-        return response_to_json(json.dumps({"status": "Success"}))
+        if result.status_code == 201:
+            return response_to_json(json.dumps({"status": "Success"}))
+        else:
+            return response_to_json(json.dumps({"status": "Fail"}))
     except:
         return response_to_json(json.dumps({"status": "Fail"}))
 
