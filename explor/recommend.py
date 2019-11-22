@@ -2,9 +2,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from explor.helpers import encode
 
-def recommend_decks(player_decks, all_top_decks, scores):
-    return all_top_decks
-    top_decks = [deck for deck in all_top_decks if not deck in player_decks]
+def recommend_decks(player_decks, top_decks, scores):
     if len(top_decks) <= 3:
         return top_decks
 

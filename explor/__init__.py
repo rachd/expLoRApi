@@ -49,10 +49,14 @@ def get_recommended_decks(player_stats):
         player_decks = player_stats["stats"]["decks"]
         top_player_decks = sorted(player_decks.keys(), key=(lambda x: player_decks[x]["uses"]))
         player_decks_decoded = [decode(deck) for deck in top_player_decks[0:5]]
-        top_decks = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
-        top_decks_decoded = [decode(deck['deck_code']) for deck in top_decks["top_decks"]]
-        top_recommendations = [] #recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks["top_decks"]])
-        return (top_decks["top_decks"][0:3], top_recommendations)
+        deck_data = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
+        top_decks = top_decks["top_decks"]
+        top_decks_filtered = [deck["deck"] for deck in top_decks if not deck["deck_code"] in ]
+        # top_decks_decoded = [deck for deck in top_decks if not deck in player_decks]
+        # top_decks_decoded = [decode(deck['deck_code']) for deck in top_decks if not deck in player_decks]
+        # top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks])
+        return (player_decks.keys(), top_decks)
+        # return (top_decks[0:3], top_recommendations)
     except:
         return {}
 
@@ -62,7 +66,7 @@ def get_player_stats(playerID):
         player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
         card_json = get_card_json()
         regions = region_stats(player_stats["stats"]["cards"], card_json)
-        (top_decks, recommended_decks) = get_recommended_decks(player_stats)
+        (top_decks, recommended_decks) = ([], []) #get_recommended_decks(player_stats)
         (playstyle, playstyle_winning) = player_analytics(player_stats["stats"]["decks"], card_json)
         output = {}
         output.update(regions)
@@ -119,9 +123,9 @@ def player_cards(playerID):
     elif request.method == 'POST':
         card = request.json['card']
         count = request.json['count']
-        data_to_send = {'card': card, 'count': count}
-        requests.post('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards/add', data=data_to_send)
-        return response_to_json(json.dumps({"status": "Success"}))
+        data_to_send = {'card_code': card, 'count': count, "player_name": playerID}
+        response = requests.post('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards/add', data=data_to_send)
+        return response_to_json(json.dumps(response))
 
 @app.route("/submit-match", methods=['POST'])
 def submit_match():
