@@ -51,7 +51,7 @@ def get_recommended_decks(player_stats):
         player_decks_decoded = [decode(deck) for deck in top_player_decks[0:5]]
         top_decks = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
         top_decks_decoded = [decode(deck['deck_code']) for deck in top_decks["top_decks"]]
-        top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks["top_decks"]])
+        top_recommendations = [] #recommend_decks(player_decks_decoded, top_decks_decoded, [deck['score'] for deck in top_decks["top_decks"]])
         return (top_decks["top_decks"][0:3], top_recommendations)
     except:
         return {}
@@ -114,11 +114,13 @@ def get_profile(playerID):
 @app.route("/cards/<playerID>", methods=['GET', 'POST'])
 def player_cards(playerID):
     if request.method == 'GET':
-        cards = []
+        cards = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards').json()
         return response_to_json(json.dumps({"cards": cards}))
     elif request.method == 'POST':
         card = request.json['card']
         count = request.json['count']
+        data_to_send = {'card': card, 'count': count}
+        requests.post('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards/add', data=data_to_send)
         return response_to_json(json.dumps({"status": "Success"}))
 
 @app.route("/submit-match", methods=['POST'])
