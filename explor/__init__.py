@@ -10,16 +10,20 @@ import requests
 app = Flask(__name__)
 api = Api(app)
 
+
 def get_card_json():
     with app.open_resource("data/cards.json") as input_json:
         return json.load(input_json)
+
 
 def get_similar_cards_json():
     with app.open_resource("data/similar_cards.json") as input_json:
         return json.load(input_json)
 
+
 def response_to_json(out_obj):
     return Response(out_obj, mimetype='application/json')
+
 
 @app.route("/deck-stats", methods=['POST'])
 def deck_stats():
@@ -27,8 +31,9 @@ def deck_stats():
         deck_code = request.json['deck_code']
         card_json = get_card_json()
         return response_to_json(json.dumps({"keywords": deck_analytics(deck_code, card_json)}))
-    except: 
+    except:
         return {}
+
 
 @app.route("/suggested-cards", methods=['POST'])
 def suggest_cards():
@@ -44,12 +49,15 @@ def suggest_cards():
     except:
         return {}
 
+
 def get_recommended_decks(player_stats):
-    try: 
+    try:
         player_decks = player_stats["stats"]["decks"]
-        top_player_decks = sorted(player_decks.keys(), key=(lambda x: player_decks[x]["uses"]))
+        top_player_decks = sorted(player_decks.keys(), key=(
+            lambda x: player_decks[x]["uses"]))
         player_decks_decoded = [decode(deck) for deck in top_player_decks[0:5]]
-        deck_data = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
+        deck_data = requests.get(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=50').json()
         top_decks = top_decks["top_decks"]
         top_decks_filtered = [deck["deck"] for deck in top_decks]
         # top_decks_decoded = [deck for deck in top_decks if not deck in player_decks]
@@ -60,14 +68,18 @@ def get_recommended_decks(player_stats):
     except:
         return {}
 
+
 @app.route("/player-stats/<playerID>", methods=['GET'])
-def get_player_stats(playerID):	
+def get_player_stats(playerID):
     try:
-        player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
+        player_stats = requests.get(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
         card_json = get_card_json()
         regions = region_stats(player_stats["stats"]["cards"], card_json)
-        (top_decks, recommended_decks) = ([], []) #get_recommended_decks(player_stats)
-        (playstyle, playstyle_winning) = player_analytics(player_stats["stats"]["decks"], card_json)
+        # get_recommended_decks(player_stats)
+        (top_decks, recommended_decks) = ([], [])
+        (playstyle, playstyle_winning) = player_analytics(
+            player_stats["stats"]["decks"], card_json)
         output = {}
         output.update(regions)
         output['popular_decks'] = top_decks
@@ -79,6 +91,7 @@ def get_player_stats(playerID):
     except:
         return {}
 
+
 @app.route("/bookmark/<playerID>", methods=['GET'])
 def get_bookmarks(playerID):
     try:
@@ -86,6 +99,7 @@ def get_bookmarks(playerID):
         return {}
     except:
         pass
+
 
 @app.route("/bookmark", methods=['POST'])
 def bookmark():
@@ -97,19 +111,24 @@ def bookmark():
     except:
         return response_to_json(json.dumps({"status": "Fail"}))
 
+
 @app.route("/profile/<playerID>", methods=['GET'])
 def get_profile(playerID):
     try:
         output = {}
         card_json = get_card_json()
-        player_stats = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
+        player_stats = requests.get(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
         match_history = player_stats["stats"]["match_history"]
         for match in match_history:
-            match.update({"deck_tags": deck_analytics(match["deck"], card_json)})
+            match.update(
+                {"deck_tags": deck_analytics(match["deck"], card_json)})
         output["match_history"] = match_history
-        top_decks = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=20').json()
-        bookmarks = [] #TODO get bookmarks
-        output["decks"] = {"most_popular": top_decks["top_decks"], "bookmarks": bookmarks}
+        top_decks = requests.get(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/decks/top-decks?n=20').json()
+        bookmarks = []  # TODO get bookmarks
+        output["decks"] = {
+            "most_popular": top_decks["top_decks"], "bookmarks": bookmarks}
         return response_to_json(json.dumps(output))
     except:
         return {}
@@ -118,14 +137,21 @@ def get_profile(playerID):
 @app.route("/cards/<playerID>", methods=['GET', 'POST'])
 def player_cards(playerID):
     if request.method == 'GET':
-        cards = requests.get('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards').json()
+        cards = requests.get(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards?player_name='+playerID).json()
         return response_to_json(json.dumps({"cards": cards}))
     elif request.method == 'POST':
         card = request.json['card']
         count = request.json['count']
-        data_to_send = {'card_code': card, 'count': count, "player_name": playerID}
-        response = requests.post('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards/add', data=data_to_send).json()
-        return response_to_json(json.dumps(response))
+        data_to_send = {"card_code": card,
+                        "count": count, "player_name": playerID}
+        result = requests.post(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/cards/add', data=data_to_send)
+        if result.status_code == 201:
+            return response_to_json(json.dumps({"status": "Success"}))
+        else:
+            return response_to_json(json.dumps({"status": "Fail"}))
+
 
 @app.route("/submit-match", methods=['POST'])
 def submit_match():
@@ -147,10 +173,12 @@ def submit_match():
             "cards": decoded_deck,
             "keywords": deck_stats,
         }
-        requests.post('http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/record-match', data = output)
+        requests.post(
+            'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/record-match', data=output)
         return response_to_json(json.dumps({"status": "Success"}))
     except:
         return response_to_json(json.dumps({"status": "Fail"}))
+
 
 @app.route("/suggest-decks", methods=["POST"])
 def suggest_decks():
