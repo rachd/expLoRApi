@@ -27,7 +27,7 @@ def response_to_json(out_obj):
 def get_bookmarks(playerID):
     bookmarks = requests.get(
         'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/my/decks?player_name='+playerID).json()
-    return [{"deck_code": bookmark["code"]} for bookmark in bookmarks["decks"]]
+    return [{"deck_code": bookmark["code"], "rank": bookmark["rank"]} for bookmark in bookmarks["decks"]]
 
 
 def get_recommended_decks(player_stats):
@@ -45,7 +45,7 @@ def get_recommended_decks(player_stats):
         top_decks_decoded = [decode(deck['deck_code'])
                              for deck in top_decks_filtered]
         top_recommendations = recommend_decks(player_decks_decoded, top_decks_decoded, [
-            deck['score'] for deck in top_decks_filtered])
+            deck['rank'] for deck in top_decks_filtered])
         return (top_decks[0:3], top_recommendations)
     except:
         return {}
