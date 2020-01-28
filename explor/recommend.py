@@ -3,7 +3,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from explor.helpers import encode
 
 
-def recommend_decks(player_decks, top_decks, scores):
+def recommend_decks(player_decks, top_decks, ranks):
     if len(top_decks) <= 3:
         return top_decks
 
@@ -22,6 +22,6 @@ def recommend_decks(player_decks, top_decks, scores):
         if not sorted_sims[i]["j"] in recommendations:
             recommendations.append(sorted_sims[i]["j"])
         i += 1
-    recommendations = [{'deck': top_decks[i], 'score': scores[i]}
+    recommendations = [{'deck': top_decks[i], 'rank': ranks[i]}
                        for i in recommendations]
-    return [{'deck_code': encode(recommendation['deck']), 'score': recommendation['score']} for recommendation in recommendations]
+    return [{'deck_code': encode(recommendation['deck']), 'rank': recommendation['rank']} for recommendation in recommendations]
