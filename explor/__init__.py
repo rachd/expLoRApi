@@ -30,7 +30,7 @@ def get_bookmarks(playerID):
     return [{"deck_code": bookmark["code"], "rank": bookmark["rank"]} for bookmark in bookmarks["decks"]]
 
 
-def get_recommended_decks(player_stats):
+def get_recommended_decks(player_stats, bookmarks):
     try:
         player_decks = player_stats["stats"]["decks"]
         player_deck_codes = player_decks.keys()
@@ -57,8 +57,13 @@ def get_player_stats(playerID):
         player_stats = requests.get(
             'http://ec2-54-85-199-0.compute-1.amazonaws.com:81/api/players/stats?player_name='+playerID).json()
         card_json = get_card_json()
+        bookmarks = [deck["deck_code" for deck in get_bookmarks(playerID)]
         regions = region_stats(player_stats["stats"]["cards"], card_json)
-        (top_decks, recommended_decks) = get_recommended_decks(player_stats)
+        (top_decks, recommended_decks) = get_recommended_decks(player_stats, bookmarks)
+        for i in range(len(top_decks)):
+            top_decks[i]["bookmarked"] = top_decks[i]["deck_code"] in bookmarks
+        for i in range(len(recommended_decks)):
+            recommended_decks[i]["bookmarked"] = recommended_decks[i]["deck_code"] in bookmarks
         (playstyle, playstyle_winning) = player_analytics(
             player_stats["stats"]["decks"], card_json)
         output = {}
